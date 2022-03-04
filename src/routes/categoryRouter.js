@@ -5,7 +5,7 @@ import categoryMiddleware from "../middlewares/categoryMiddleware.js";
 const categoryRouter = Router();
 
 categoryRouter.post('/categories',
-    // categoryMiddleware, 
+    categoryMiddleware, 
     postCategory
 );
 categoryRouter.get('/categories',
