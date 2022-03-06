@@ -19,10 +19,6 @@ export async function getCategory(_request, response) {
 export async function postCategory(request, response) {
     const { name } = request.body;
 
-    if (name === "") {
-        return response.sendStatus(400);
-    }
-
     try {
         const queryCategories = await connection.query(`
             SELECT * 
@@ -30,7 +26,7 @@ export async function postCategory(request, response) {
         `);
         const seachedCategory = queryCategories.rows.find(consulted => consulted.name === name);
 
-        if (seachedCategory === undefined) {
+        if (!seachedCategory) {
             await connection.query(`
                 INSERT INTO
                 categories (name)

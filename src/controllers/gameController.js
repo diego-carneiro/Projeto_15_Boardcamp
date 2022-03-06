@@ -4,13 +4,10 @@ export async function getGames(request, response) {
     const name = request.query.name;
 
     try {
-        if (name === undefined) {
-            response.sendStatus(400);
-        }
-
         const queryGames = await connection.query(`
-            SELECT games.*, categories.name as "category" from games
-            JOIN categories on games."categoryId"=categories.id
+            SELECT games.*, categories.name as "categoryId" 
+            FROM games
+            JOIN categories ON games."categoryId"=categories.id
             WHERE LOWER(games.name) LIKE LOWER($1)
         `, [`${name}%`]);
 
@@ -25,10 +22,6 @@ export async function getGames(request, response) {
 export async function postGames(request, response) {
     const game = request.body;
 
-    if (game.name === "") {
-        return response.sendStatus(400);
-    };
-
     try {
         const queryCategories = await connection.query(`
             SELECT * 
@@ -40,6 +33,7 @@ export async function postGames(request, response) {
             SELECT *
             FROM games
         `);
+
         const searchedGame = queryGames.rows.find(consulted => consulted.name === game.name);
 
         if (searchedCategory !== undefined) {
@@ -54,7 +48,7 @@ export async function postGames(request, response) {
                 response.sendStatus(201);
 
             } else {
-                return sendStatus(409);
+                return response.sendStatus(409);
             }
         } else {
             return response.sendStatus(400);
