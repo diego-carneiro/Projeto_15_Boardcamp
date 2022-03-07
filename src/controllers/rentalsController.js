@@ -12,12 +12,8 @@ export async function getRentals(request, response) {
         `);
 
         const customerInfo = await connection.query(`
-            SELECT customers.id 
-            AS id, customers.name 
-            AS name
+            SELECT id, name
             FROM customers
-            JOIN rentals
-            ON rentals."customerId" = customers.id
         `);
 
         const gameInfo = await connection.query(`
@@ -27,7 +23,7 @@ export async function getRentals(request, response) {
             ON categories.id = games."categoryId"
         `);
 
-        queryRentals.rows = queryRentals.rows.map(item => ({
+        let formattedResponse = queryRentals.rows.map(item => ({
             id: item.id,
             customerId: item.customerId,
             gameId: item.gameId,
@@ -41,20 +37,26 @@ export async function getRentals(request, response) {
         }));
 
         if (customerId !== undefined && gameId !== undefined) {
-            queryRentals.rows = queryRentals.rows.filter(value => value.customer.id === parseInt(customerId) && value.game.id === parseInt(gameId));
-            return response.send(queryRentals.rows);
+            formattedResponse = formattedResponse.filter(value =>
+                value.customerId === parseInt(customerId) && value.gameId === parseInt(gameId)
+            );
+            return response.send(formattedResponse);
         }
 
         if (customerId !== undefined && gameId === undefined) {
-            queryRentals.rows = queryRentals.rows.filter(value => value.customer.id === parseInt(customerId));
-            return response.send(queryRentals.rows);
+            formattedResponse = formattedResponse.filter(value =>
+                value.customer.id === parseInt(customerId)
+            );
+            
+            return response.send(formattedResponse);
         }
 
         if (gameId !== undefined && customerId === undefined) {
-            queryRentals.rows = queryRentals.rows.filter(value => value.game.id === parseInt(gameId));
-            return resp.send(queryRentals.rows);
+            formattedResponse = formattedResponse.filter(value => value.gameId === parseInt(gameId));
+            return response.send(formattedResponse);
         }
-        response.send(queryRentals.rows);
+
+        response.send(formattedResponse);
     }
 
     catch (error) {

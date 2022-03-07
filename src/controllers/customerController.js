@@ -60,7 +60,7 @@ export async function getCustomer(request, response) {
                 }
             ));
 
-            response.send(birthdayFormatter);
+            response.send(birthdayFormatter[0]);
         } else {
             return response.sendStatus(404);
         }
