@@ -3,9 +3,22 @@ import connection from "../database.js";
 export async function getGames(request, response) {
     const name = request.query.name;
 
+    if (!name) {
+        const queryAllGames  = await connection.query(`
+            SELECT games.*, categories.name 
+            AS "categoryName"
+            FROM games
+            JOIN categories
+            ON games."categoryId"=categories.id
+        `);
+
+        return response.send(queryAllGames.rows);
+    }
+
     try {
         const queryGames = await connection.query(`
-            SELECT games.*, categories.name as "categoryId" 
+            SELECT games.*, categories.name 
+            AS "categoryName" 
             FROM games
             JOIN categories ON games."categoryId"=categories.id
             WHERE LOWER(games.name) LIKE LOWER($1)

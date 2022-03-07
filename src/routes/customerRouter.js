@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { getCustomer, getAllCustomers, postCustomer, updateCustomer } from "../controllers/customerController.js";
-// import categoryMiddleware from "../middlewares/categoryMiddleware.js";
+import customerMiddleware from "../middlewares/customerMiddleware.js";
 
 const customerRouter = Router();
 
 customerRouter.post('/customers',
-    // categoryMiddleware, 
+    customerMiddleware, 
     postCustomer
 );
 customerRouter.get('/customers',
@@ -14,7 +14,7 @@ customerRouter.get('/customers',
 customerRouter.get('/customers/:id',
     getCustomer
 );
-customerRouter.put('/customers:id',
+customerRouter.put('/customers/:id',
     updateCustomer
 );
 

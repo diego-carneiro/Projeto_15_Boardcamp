@@ -1,4 +1,5 @@
 import connection from "../database.js";
+import dayjs from "dayjs";
 
 export async function getAllCustomers(request, response) {
     const cpf = request.query.cpf;
@@ -9,7 +10,16 @@ export async function getAllCustomers(request, response) {
                 SELECT * 
                 FROM customers
             `);
-            res.send(queryAllCustomers.rows);
+
+            const birthdayFormatter = queryAllCustomers.rows.map(item => (
+                {
+                    ...item,
+                    birthday: dayjs(item.birthday).format('YYYY-MM-DD')
+                }
+            ));
+
+            return response.send(birthdayFormatter);
+
         } else {
             const queryCustomers = await connection.query(`
                 SELECT *
@@ -36,14 +46,21 @@ export async function getCustomer(request, response) {
         `);
         const searchedCustomer = queryCustomer.rows.find(consulted => consulted.id === id);
 
-        if(searchedCustomer){
+        if (searchedCustomer) {
             const queryCustomer = await connection.query(`
                 SELECT * 
                 FROM customers
                 WHERE id=$1
             `, [id]);
-            
-            response.send(queryCustomer.rows[0]);
+
+            const birthdayFormatter = queryCustomer.rows.map(item => (
+                {
+                    ...item,
+                    birthday: dayjs(item.birthday).format('YYYY-MM-DD')
+                }
+            ));
+
+            response.send(birthdayFormatter);
         } else {
             return response.sendStatus(404);
         }
@@ -63,16 +80,14 @@ export async function postCustomer(request, response) {
             FROM customers
         `);
 
-        const searchedCustomers = queryCustomers.rows.find(consulted => consulted.cpf === CustomElementRegistry.cpf);
+        const searchedCustomers = queryCustomers.rows.find(consulted => consulted.cpf === newCustomer.cpf);
 
-        const searchedGame = queryGames.rows.find(consulted => consulted.name === game.name);
-
-        if (searchedGame === undefined) {
+        if (!searchedCustomers) {
             await connection.query(`
                 INSERT INTO
                 customers (name, phone, cpf, birthday)
                 VALUES ($1, $2, $3, $4)`,
-                [customer.name, customer.phone, customer.cpf, customer.birthday]
+                [newCustomer.name, newCustomer.phone, newCustomer.cpf, dayjs(newCustomer.birthday).format('YYYY-MM-DD')]
             );
 
             response.sendStatus(201);
@@ -95,12 +110,7 @@ export async function updateCustomer(request, response) {
         await connection.queryCustomer(`
             UPDATE customers SET name=$1, phone=$2, cpf=$3, birthday=$4
             WHERE customers.id=$5`,
-            [newInfos.name, newInfos.phone, newInfos.cpf, newInfos
-
-
-
-
-                .birthday, id]
+            [newInfos.name, newInfos.phone, newInfos.cpf, newInfos.birthday, id]
         );
 
         response.sendStatus(200);
